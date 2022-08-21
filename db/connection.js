@@ -6,6 +6,8 @@ const db = mysql.createConnection(
         user: 'root',
         password: '',
         database: 'eTrackerDB'
-    });
+    },
+    console.log('Connected to Employee database.');
+);
 
 module.exports = db;
