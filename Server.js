@@ -119,4 +119,4 @@ function removeDepartment() {
 }
 
 //call start function (each separate function will call start at the end so you can return to the menu)
-start();and
+start();
