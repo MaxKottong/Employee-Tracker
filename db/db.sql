@@ -1,4 +1,0 @@
-DROP DATABASE IF EXISTS eTrackerDB;
-CREATE DATABASE eTrackerDB;
-
-USE eTrackerDB;

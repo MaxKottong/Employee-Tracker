@@ -1,16 +1,15 @@
-const db = require('./db/connection');
-const PORT = process.env.PORT || 3001;
 const inquirer = require('inquirer');
-const mysql = require('mysql2');
 const Employee = require('./lib/Employee');
 const Department = require('./lib/Department');
 const Role = require('./lib/Role');
+
+//let employee/role/department = new Employee/Role/Department??
 
 //Start function -- Asks what you want to do, then takes the data from the response, creates a switch for each selection,
 //and each selection starts its own function.
 function start() {
     let question = "What would you like to do?";
-    let choices = [
+    let options = [
         "View All Employees",
         "Add Employee",
         "Remove Employee",
@@ -28,19 +27,19 @@ function start() {
         name: "action",
         type: "list",
         message: question,
-        choices: choices
-    }).then((data) => {
+        choices: options
+    }).then(data => {
         switch (data.action) {
             case "View All Employees":
-                //print employees
+                Employee.printEmployees();
                 start();
                 break;
             case "View All Roles":
-                //print roles
+                Role.printRoles();
                 start();
                 break;
             case "View All Departments":
-                //print departments
+                Department.printDepartments();
                 start();
                 break;
             case "Add Employee":
@@ -75,6 +74,7 @@ function start() {
                 start();
                 break;
         }
+        console.log('JIMMY');
     });
 }
 
