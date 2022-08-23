@@ -24,7 +24,7 @@ function start() {
         "Add Department",
         "Remove Department",
         "Exit"
-    ];
+    ]; 
 
     inquirer.prompt({
         name: "action",
