@@ -1,9 +1,14 @@
 const inquirer = require('inquirer');
+const db = require('./db/connection');
+const mysql = require('mysql2');
 const Employee = require('./lib/Employee');
 const Department = require('./lib/Department');
 const Role = require('./lib/Role');
 
 //let employee/role/department = new Employee/Role/Department??
+let employee = new Employee(db);
+let role = new Role(db);
+let department = new Department(db);
 
 //Start function -- Asks what you want to do, then takes the data from the response, creates a switch for each selection,
 //and each selection starts its own function.
@@ -31,15 +36,15 @@ function start() {
     }).then(data => {
         switch (data.action) {
             case "View All Employees":
-                Employee.printEmployees();
+                employee.printEmployees();
                 start();
                 break;
             case "View All Roles":
-                Role.printRoles();
+                role.printRoles();
                 start();
                 break;
             case "View All Departments":
-                Department.printDepartments();
+                department.printDepartments();
                 start();
                 break;
             case "Add Employee":
@@ -74,7 +79,6 @@ function start() {
                 start();
                 break;
         }
-        console.log('JIMMY');
     });
 }
 
