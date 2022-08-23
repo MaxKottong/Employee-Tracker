@@ -1,6 +1,9 @@
 DROP DATABASE IF EXISTS eTrackerDB;
 CREATE DATABASE eTrackerDB;
 
+CREATE USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY '';
+GRANT ALL PRIVILEGES ON eTrackerDB.* TO 'root'@'localhost';
+
 USE eTrackerDB;
 
 DROP TABLE IF EXISTS employee;
