@@ -88,26 +88,59 @@ function addDepartment() {
         name: 'deptName',
         message: 'What is the name of the new department?'
     })
-        .then(choice => {
-            return department.addDepartment(choice.deptName);
-        })
-        .then(result => {
-            if (result.affectedRows > 0) {
-
-                return `\nNew Department Created!`;
-                start();
-            }
+        .then(data => {
+            department.addDepartment(data.deptName);
+            start();
         })
 }
 
 //addRole function
 function addRole() {
+    const deptChoices = department.
 
+    inquirer.prompt([
+        {
+            type: 'list',
+            name: 'department_id',
+            message: 'Which department should this role belong to?',
+            choices: deptChoices
+        },
+        {
+            type: 'input',
+            name: 'title',
+            message: 'What is the role title'
+        },
+        {
+            type: 'input',
+            name: 'salary',
+            message: 'What is the salary of the role?',
+            validate: input => {
+                if (isNaN(input)) {
+                    console.log("You did not enter a valid salary")
+                    return false;
+                }
+
+                return true;
+            }
+        }
+    ])
+        .then(data => {
+            role.addRole(data.roleName);
+            start();
+        })
 }
 
 //addEmployee function
 function addEmployee() {
-
+    inquirer.prompt({
+        type: 'input',
+        name: 'employeeName',
+        message: 'What is the name of the new employee?'
+    })
+        .then(data => {
+            employee.addEmployee(data.employeeName);
+            start();
+        })
 }
 
 //updateEmployeeRole function
