@@ -160,7 +160,26 @@ function addEmployee() {
 
 //updateEmployeeRole function
 function updateEmployeeRole() {
+    const empChoices = employee.getEmployees();
+    const roleChoices = role.getRoles();
 
+    inquirer.prompt([
+        {
+            type: 'list',
+            name: 'employee_id',
+            choices: empChoices,
+            message: 'Select an employee to update'
+        },
+        {
+            type: 'list',
+            name: 'role_id',
+            choices: roleChoices,
+            message: `Select the employee's new role`
+        }
+    ])
+        .then(data => {
+            employee.updateRole(data.employee_id, data.role_id);
+        })
 }
 
 //updateEmployeeManager function
