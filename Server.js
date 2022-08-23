@@ -20,7 +20,7 @@ function start() {
         "View All Roles",
         "Add Role",
         "Remove Role",
-        "View all departments",
+        "View All Departments",
         "Add Department",
         "Remove Department",
         "Exit"
@@ -71,6 +71,7 @@ function start() {
                 break;
             case "Exit":
                 console.log("Thank you for using our Employee Tracker.");
+                process.exit();
                 break;
             default:
                 console.log(`Action (${data.action}) is not supported.`);
@@ -82,7 +83,21 @@ function start() {
 
 //addDepartment function
 function addDepartment() {
+    inquirer.prompt({
+        type: 'input',
+        name: 'deptName',
+        message: 'What is the name of the new department?'
+    })
+        .then(choice => {
+            return department.addDepartment(choice.deptName);
+        })
+        .then(result => {
+            if (result.affectedRows > 0) {
 
+                return `\nNew Department Created!`;
+                start();
+            }
+        })
 }
 
 //addRole function
