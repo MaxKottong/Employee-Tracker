@@ -15,14 +15,12 @@ function start() {
     let options = [
         "View All Employees",
         "Add Employee",
-        "Remove Employee",
         "Update Employee Role",
         "View All Roles",
         "Add Role",
-        "Remove Role",
         "View All Departments",
         "Add Department",
-        "Remove Department",
+        "Remove Employee, Department or Role",
         "Exit"
     ]; 
 
@@ -60,14 +58,8 @@ function start() {
             case "Update Employee Manager":
                 updateEmployeeManager();
                 break;
-            case "Remove Employee":
-                removeEmployee();
-                break;
-            case "Remove Role":
-                removeRole();
-                break;
-            case "Remove Department":
-                removeDepartment();
+            case "Remove Employee, Department or Role":
+                remove();
                 break;
             case "Exit":
                 console.log("Thank you for using our Employee Tracker.");
@@ -96,14 +88,14 @@ function addDepartment() {
 
 //addRole function
 function addRole() {
-    const deptChoices = department.
+    const deptChoices = department.getDepartments();
 
     inquirer.prompt([
         {
             type: 'list',
             name: 'department_id',
-            message: 'Which department should this role belong to?',
-            choices: deptChoices
+            choices: deptChoices,
+            message: 'Which department should this role belong to?'
         },
         {
             type: 'input',
@@ -125,18 +117,41 @@ function addRole() {
         }
     ])
         .then(data => {
-            role.addRole(data.roleName);
+            role.addRole(data);
             start();
         })
 }
 
 //addEmployee function
 function addEmployee() {
-    inquirer.prompt({
-        type: 'input',
-        name: 'employeeName',
-        message: 'What is the name of the new employee?'
-    })
+    const roleChoices = role.getRoles();
+
+    const empChoices = employee.getEmployees();
+
+    inquirer.prompt([
+        {
+            type: 'input',
+            name: 'first',
+            message: `Enter the new employee's first name`
+        },
+        {
+            type: 'input',
+            name: 'last',
+            message: `Enter the new employee's last name`
+        },
+        {
+            type: 'list',
+            name: 'role',
+            choices: roleChoices,
+            message: `Select the employee's new role`
+        },
+        {
+            type: 'list',
+            name: 'manager',
+            choices: empChoices,
+            message: 'Which employee will be their manager?'
+        }
+    ])
         .then(data => {
             employee.addEmployee(data.employeeName);
             start();
@@ -150,22 +165,74 @@ function updateEmployeeRole() {
 
 //updateEmployeeManager function
 function updateEmployeeManager() {
+    const empChoices = employee.getEmployees();
+    const managerChoices = employee.getEmployees();
+    managerChoices.push({ name: 'No Manager', value: 'NULL' });
 
+    inquirer.prompt([
+        {
+            type: 'list',
+            message: 'Which employee would you like to upate the manager of?',
+            choices: empChoices,
+            name: 'employeeId'
+        },
+        {
+            type: 'list',
+            message: 'Who will be their new manager?',
+            choices: managerChoices,
+            name: 'managerId'
+        }
+    ])
+        .then(data => {
+            employee.updateManager(data.employeeId, data.managerId);
+        })
 }
 
-//removeEmployee function
-function removeEmployee() {
+function remove() {
+    const employees = employee.getEmployees();
+    const departments = department.getDepartments();
+    const roles = role.getRoles();
 
-}
-
-//removeRole function
-function removeRole() {
-
-}
-
-//removeDepartment function
-function removeDepartment() {
-
+    inquirer.prompt({
+        type: 'list',
+        message: 'What would you like to delete?',
+        choices: ['Employee', 'Department', 'Role'],
+        name: 'deleteChoice'
+    })
+        .then(data => {
+            let recordList = []
+            switch (data.deleteChoice) {
+                case 'Employee':
+                    recordList = employees;
+                    break;
+                case 'Department':
+                    recordList = departments;
+                    break;
+                case 'Role':
+                    recordList = roles;
+                    break;
+            }
+            inquirer.prompt({
+                type: 'list',
+                message: 'Choose a record to delete',
+                choices: recordList,
+                name: 'recordId'
+            })
+                .then(deleteChoice => {
+                    switch (data.deleteChoice) {
+                        case 'Employee':
+                            employee.deleteEmployee(deleteChoice.recordId);
+                            break;
+                        case 'Department':
+                            department.deleteDepartment(deleteChoice.recordId);
+                            break;
+                        case 'Role':
+                            role.deleteRole(deleteChoice.recordId);
+                            break;
+                    }
+                })
+            start();
+        })
 }
 
 //call start function (each separate function will call start at the end so you can return to the menu)
