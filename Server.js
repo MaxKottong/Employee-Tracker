@@ -91,41 +91,56 @@ function addDepartment() {
 function addRole() {
     let departments = ['No department'];
 
-    db.query('SELECT * FROM department'),
+    db.query('SELECT * FROM department',
         function (err, res) {
-
-        }
-
-    inquirer.prompt([
-        {
-            type: 'list',
-            name: 'department_id',
-            choices: deptChoices,
-            message: 'Which department should this role belong to?'
-        },
-        {
-            type: 'input',
-            name: 'title',
-            message: 'What is the role title'
-        },
-        {
-            type: 'input',
-            name: 'salary',
-            message: 'What is the salary of the role?',
-            validate: input => {
-                if (isNaN(input)) {
-                    console.log("You did not enter a valid salary")
-                    return false;
-                }
-
-                return true;
+            if (err) {
+                console.log(err);
             }
+            for (let i = 0; i < res.length; i++) {
+                if (res[i].name) {
+                    departments.push(res[i].name);
+                }
+            }
+
+            inquirer.prompt([
+                {
+                    type: 'list',
+                    name: 'department_id',
+                    choices: departments,
+                    message: 'Which department should this role belong to?'
+                },
+                {
+                    type: 'input',
+                    name: 'title',
+                    message: 'What is the role title'
+                },
+                {
+                    type: 'input',
+                    name: 'salary',
+                    message: 'What is the salary of the role?',
+                    validate: input => {
+                        if (isNaN(input)) {
+                            console.log("You did not enter a valid salary")
+                            return false;
+                        }
+
+                        return true;
+                    }
+                }
+            ])
+                .then((data) => {
+                    let departmentId = null;
+                    for (let i = 0; i < res.length; i++) {
+                        if (res[i].name === data.department) {
+                            departmentId = res[i].id;
+                            break;
+                        }
+                    }
+                    role.addRole(data.title, data.salary, departmentId);
+                    start();
+                });
         }
-    ])
-        .then(data => {
-            role.addRole(data);
-            start();
-        })
+    );
 }
 
 //addEmployee function
@@ -135,7 +150,9 @@ function addEmployee() {
 
     db.query("SELECT * FROM role ",
         function (err, roleRes) {
-            if (err) console.log(err);
+            if (err) {
+                console.log(err);
+            }
             for (let i = 0; i < roleRes.length; i++) {
                 if (roleRes[i].title) {
                     roles.push(roleRes[i].title);
