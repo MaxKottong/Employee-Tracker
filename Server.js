@@ -4,7 +4,6 @@ const Employee = require('./lib/Employee');
 const Department = require('./lib/Department');
 const Role = require('./lib/Role');
 
-//let employee/role/department = new Employee/Role/Department??
 let employee = new Employee;
 let role = new Role;
 let department = new Department;
@@ -106,14 +105,14 @@ function addRole() {
             inquirer.prompt([
                 {
                     type: 'list',
-                    name: 'department_id',
+                    name: 'departmentName',
                     choices: departments,
                     message: 'Which department should this role belong to?'
                 },
                 {
                     type: 'input',
                     name: 'title',
-                    message: 'What is the role title'
+                    message: 'What is the role title?'
                 },
                 {
                     type: 'input',
@@ -132,7 +131,7 @@ function addRole() {
                 .then((data) => {
                     let departmentId = null;
                     for (let i = 0; i < res.length; i++) {
-                        if (res[i].name === data.department) {
+                        if (res[i].name == data.departmentName) {
                             departmentId = res[i].id;
                             break;
                         }
@@ -196,7 +195,7 @@ function addEmployee() {
                         .then(data => {
                             let roleId = null;
                             for (let i = 0; i < roleRes.length; i++) {
-                                if (roleRes[i].title === data.role) {
+                                if (roleRes[i].title == data.role) {
                                     roleId = roleRes[i].id;
                                     break;
                                 }
@@ -204,12 +203,12 @@ function addEmployee() {
 
                             let managerId = null;
                             for (let i = 0; i < empRes.length; i++) {
-                                if (empRes[i].first_name + " " + empRes[i].last_name === data.manager) {
+                                if (empRes[i].first_name + " " + empRes[i].last_name == data.manager) {
                                     managerId = empRes[i].id;
                                     break;
                                 }
                             }
-                            employee.addEmployee(data.first, data.last, roleId, managerId)
+                            employee.addEmployee(data.first, data.last, roleId, managerId);
                             start();
                         });
                 }
@@ -248,13 +247,13 @@ function updateEmployeeRole() {
                     inquirer.prompt([
                         {
                             type: 'list',
-                            name: 'employee_id',
+                            name: 'employeeName',
                             choices: employees,
                             message: 'Select an employee to update'
                         },
                         {
                             type: 'list',
-                            name: 'role_id',
+                            name: 'role',
                             choices: roles,
                             message: `Select the employee's new role`
                         }
@@ -262,17 +261,16 @@ function updateEmployeeRole() {
                         .then(data => {
                             let roleId = null;
                             for (let i = 0; i < roleRes.length; i++) {
-                                if (roleRes[i].title === data.role) {
+                                if (roleRes[i].title == data.role) {
                                     roleId = roleRes[i].id;
                                     break;
                                 }
                             }
                             for (let i = 0; i < empRes.length; i++) {
-                                if (empRes[i].first_name + " " + empRes[i].last_name === data.employee) {
-                                    employee.role_id = roleId;
-                                    employee.updateEmployee();
+                                let managerId = null;
+                                if (empRes[i].first_name + " " + empRes[i].last_name == data.employeeName) {
+                                    managerId = empRes[]
                                     break;
-
                                 }
                             }
                             start();
@@ -285,27 +283,55 @@ function updateEmployeeRole() {
 
 //updateEmployeeManager function
 function updateEmployeeManager() {
-    const empChoices = employee.getEmployees();
-    const managerChoices = employee.getEmployees();
-    managerChoices.push({ name: 'No Manager', value: 'NULL' });
+    let managers = ['No Manager'];
+    let employees = [];
 
-    inquirer.prompt([
-        {
-            type: 'list',
-            message: 'Which employee would you like to upate the manager of?',
-            choices: empChoices,
-            name: 'employeeId'
-        },
-        {
-            type: 'list',
-            message: 'Who will be their new manager?',
-            choices: managerChoices,
-            name: 'managerId'
+    db.query(`SELECT * FROM employee`,
+        function (err, res) {
+            if (err) {
+                console.log(err);
+            }
+            for (let i = 0; i < res.length; i++) {
+                if (res[i].first_name) {
+                    employees.push(res[i].first_name + " " + res[i].last_name);
+                    managers.push(res[i].first_name + " " + res[i].last_name);
+                }
+            }
+
+            inquirer.prompt([
+                {
+                    type: 'list',
+                    message: 'Which employee would you like to upate the manager of?',
+                    choices: employees,
+                    name: 'employeeId'
+                },
+                {
+                    type: 'list',
+                    message: 'Who will be their new manager?',
+                    choices: managers,
+                    name: 'managerId'
+                }
+            ])
+                .then(data => {
+                    let managerId = null;
+                    for (let i = 0; i < res.length; i++) {
+                        if (res[i].first_name + " " + res[i].last_name === data.manager) {
+                            managerId = res[i].id;
+                            break;
+                        }
+                    }
+                    for (let i = 0; i < res.length; i++) {
+                        if (res[i].first_name + " " + res[i].last_name === data.employee) {
+                            employee.setProperties(res[i]);
+                            employee.manager_id = managerId;
+                            employee.updateEmployee();
+                            break;
+                        }
+                    }
+                    start();
+                });
         }
-    ])
-        .then(data => {
-            employee.updateManager(data.employeeId, data.managerId);
-        })
+    )
 }
 
 function remove() {
