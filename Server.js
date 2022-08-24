@@ -341,9 +341,6 @@ function updateEmployeeManager() {
 }
 
 function remove() {
-    const employees = employee.getEmployees();
-    const departments = department.getDepartments();
-    const roles = role.getRoles();
 
     inquirer.prompt({
         type: 'list',
@@ -352,39 +349,135 @@ function remove() {
         name: 'deleteChoice'
     })
         .then(data => {
-            let recordList = []
             switch (data.deleteChoice) {
                 case 'Employee':
-                    recordList = employees;
+                    removeEmployee();
                     break;
                 case 'Department':
-                    recordList = departments;
+                    removeDepartment();
                     break;
                 case 'Role':
-                    recordList = roles;
+                    removeRole();
                     break;
             }
-            inquirer.prompt({
-                type: 'list',
-                message: 'Choose a record to delete',
-                choices: recordList,
-                name: 'recordId'
-            })
-                .then(deleteChoice => {
-                    switch (data.deleteChoice) {
-                        case 'Employee':
-                            employee.deleteEmployee(deleteChoice.recordId);
-                            break;
-                        case 'Department':
-                            department.deleteDepartment(deleteChoice.recordId);
-                            break;
-                        case 'Role':
-                            role.deleteRole(deleteChoice.recordId);
-                            break;
-                    }
-                })
+
             start();
         })
+}
+
+function removeEmployee() {
+    let employees = [];
+
+    db.query(`SELECT * FROM employee`,
+        function (err, res) {
+            if (err) {
+                console.log(err);
+            }
+            for (let i = 0; i < res.length; i++) {
+                if (res[i].first_name) {
+                    employees.push(res[i].first_name + " " + res[i].last_name);
+                }
+            }
+
+            inquirer.prompt([
+                {
+                    type: 'list',
+                    message: 'Which employee would you like to remove?',
+                    choices: employees,
+                    name: 'employeeName'
+                }
+            ])
+                .then(data => {
+                    let employeeId = null;
+                    for (let i = 0; i < res.length; i++) {
+                        if (res[i].first_name + " " + res[i].last_name == data.employeeName) {
+                            employeeId = res[i].id;
+                            break;
+                        }
+                    }
+
+                    employee.removeEmployee(employeeId);
+                });
+        }
+    )
+}
+
+function removeDepartment() {
+    let departments = [];
+
+    db.query(`SELECT * FROM department`,
+        function (err, res) {
+            if (err) {
+                console.log(err);
+            }
+            for (let i = 0; i < res.length; i++) {
+                if (res[i].id) {
+                    departments.push(res[i].id);
+                }
+            }
+
+            inquirer.prompt([
+                {
+                    type: 'list',
+                    message: 'Which department would you like to remove?',
+                    name: 'deptName'
+                }
+            ])
+                .then(data => {
+                    let deptId = null;
+                    for (let i = 0; i < res.length; i++) {
+                        if (res[i].id == data.deptName) {
+                            deptId = res[i].id;
+                            break;
+                        }
+                    }
+
+                    department.removeDepartment(deptId);
+                });
+        }
+    )
+    //Get list of departments
+    //Let user pick a department
+
+    //Look up the departmentId based on the name chosen
+    //Call deleteDepartment
+
+}
+
+function removeRole() {
+    let roles = [];
+
+    db.query(`SELECT * FROM role`,
+        function (err, res) {
+            if (err) {
+                console.log(err);
+            }
+            for (let i = 0; i < res.length; i++) {
+                if (res[i].id) {
+                    roles.push(res[i].id);
+                }
+            }
+
+            inquirer.promot([
+                {
+                    type: 'list',
+                    message: 'Which role would you like to remove?',
+                    name: 'roleName'
+                }
+            ])
+                .then(data => {
+                    let roleId = null;
+                    for (let i = 0; i < res.length; i++) {
+                        if (res[i].id == data.roleName) {
+                            roleId = res[i].id;
+                            break;
+                        }
+                    }
+
+                    role.removeRole(roleId);
+                })
+        }
+    )
 }
 
 //call start function (each separate function will call start at the end so you can return to the menu)
