@@ -266,13 +266,17 @@ function updateEmployeeRole() {
                                     break;
                                 }
                             }
+
+                            let employeeId = null;
                             for (let i = 0; i < empRes.length; i++) {
                                 let managerId = null;
                                 if (empRes[i].first_name + " " + empRes[i].last_name == data.employeeName) {
-                                    managerId = empRes[]
+                                    employeeId = empRes[i].id;
                                     break;
                                 }
                             }
+
+                            employee.updateRole(employeeId, roleId);
                             start();
                         });
                 }
@@ -303,31 +307,33 @@ function updateEmployeeManager() {
                     type: 'list',
                     message: 'Which employee would you like to upate the manager of?',
                     choices: employees,
-                    name: 'employeeId'
+                    name: 'employeeName'
                 },
                 {
                     type: 'list',
                     message: 'Who will be their new manager?',
                     choices: managers,
-                    name: 'managerId'
+                    name: 'managerName'
                 }
             ])
                 .then(data => {
                     let managerId = null;
                     for (let i = 0; i < res.length; i++) {
-                        if (res[i].first_name + " " + res[i].last_name === data.manager) {
+                        if (res[i].first_name + " " + res[i].last_name == data.managerName) {
                             managerId = res[i].id;
                             break;
                         }
                     }
+
+                    let employeeId = null;
                     for (let i = 0; i < res.length; i++) {
-                        if (res[i].first_name + " " + res[i].last_name === data.employee) {
-                            employee.setProperties(res[i]);
-                            employee.manager_id = managerId;
-                            employee.updateEmployee();
+                        if (res[i].first_name + " " + res[i].last_name == data.employeeName) {
+                            employeeId = res[i].id;
                             break;
                         }
                     }
+
+                    employee.updateManager(employeeId, managerId);
                     start();
                 });
         }
