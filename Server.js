@@ -17,6 +17,7 @@ function start() {
         "View All Employees",
         "Add Employee",
         "Update Employee Role",
+        "Update Employee Manager",
         "View All Roles",
         "Add Role",
         "View All Departments",
@@ -219,26 +220,67 @@ function addEmployee() {
 
 //updateEmployeeRole function
 function updateEmployeeRole() {
-    const empChoices = employee.getEmployees();
-    const roleChoices = role.getRoles();
+    let roles = ['No Role'];
+    let employees = [];
 
-    inquirer.prompt([
-        {
-            type: 'list',
-            name: 'employee_id',
-            choices: empChoices,
-            message: 'Select an employee to update'
-        },
-        {
-            type: 'list',
-            name: 'role_id',
-            choices: roleChoices,
-            message: `Select the employee's new role`
+    db.query(`SELECT * FROM role`,
+        function (err, roleRes) {
+            if (err) {
+                console.log(err);
+            }
+            for (let i = 0; i < roleRes.length; i++) {
+                if (roleRes[i].title) {
+                    roles.push(roleRes[i].title);
+                }
+            }
+
+            db.query(`SELECT * FROM employee`,
+                function (err, empRes) {
+                    if (err) {
+                        console.log(err);
+                    }
+                    for (let i = 0; i < empRes.length; i++) {
+                        if (empRes[i].first_name) {
+                            employees.push(empRes[i].first_name + " " + empRes[i].last_name);
+                        }
+                    }
+
+                    inquirer.prompt([
+                        {
+                            type: 'list',
+                            name: 'employee_id',
+                            choices: employees,
+                            message: 'Select an employee to update'
+                        },
+                        {
+                            type: 'list',
+                            name: 'role_id',
+                            choices: roles,
+                            message: `Select the employee's new role`
+                        }
+                    ])
+                        .then(data => {
+                            let roleId = null;
+                            for (let i = 0; i < roleRes.length; i++) {
+                                if (roleRes[i].title === data.role) {
+                                    roleId = roleRes[i].id;
+                                    break;
+                                }
+                            }
+                            for (let i = 0; i < empRes.length; i++) {
+                                if (empRes[i].first_name + " " + empRes[i].last_name === data.employee) {
+                                    employee.role_id = roleId;
+                                    employee.updateEmployee();
+                                    break;
+
+                                }
+                            }
+                            start();
+                        });
+                }
+            )
         }
-    ])
-        .then(data => {
-            employee.updateRole(data.employee_id, data.role_id);
-        })
+    )
 }
 
 //updateEmployeeManager function
