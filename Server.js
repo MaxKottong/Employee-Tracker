@@ -1,4 +1,5 @@
 const inquirer = require('inquirer');
+const db = require('./db/connection');
 const Employee = require('./lib/Employee');
 const Department = require('./lib/Department');
 const Role = require('./lib/Role');
@@ -22,7 +23,7 @@ function start() {
         "Add Department",
         "Remove Employee, Department or Role",
         "Exit"
-    ]; 
+    ];
 
     inquirer.prompt({
         name: "action",
@@ -88,7 +89,12 @@ function addDepartment() {
 
 //addRole function
 function addRole() {
-    const deptChoices = department.getDepartments();
+    let departments = ['No department'];
+
+    db.query('SELECT * FROM department'),
+        function (err, res) {
+
+        }
 
     inquirer.prompt([
         {
@@ -124,38 +130,74 @@ function addRole() {
 
 //addEmployee function
 function addEmployee() {
-    const roleChoices = role.getRoles();
+    let roles = ['No Role'];
+    let managers = ['No Manager'];
 
-    const empChoices = employee.getEmployees();
+    db.query("SELECT * FROM role ",
+        function (err, roleRes) {
+            if (err) console.log(err);
+            for (let i = 0; i < roleRes.length; i++) {
+                if (roleRes[i].title) {
+                    roles.push(roleRes[i].title);
+                }
+            }
 
-    inquirer.prompt([
-        {
-            type: 'input',
-            name: 'first',
-            message: `Enter the new employee's first name`
-        },
-        {
-            type: 'input',
-            name: 'last',
-            message: `Enter the new employee's last name`
-        },
-        {
-            type: 'list',
-            name: 'role',
-            choices: roleChoices,
-            message: `Select the employee's new role`
-        },
-        {
-            type: 'list',
-            name: 'manager',
-            choices: empChoices,
-            message: 'Which employee will be their manager?'
+            db.query("SELECT * from employee ",
+                function (err, empRes) {
+                    if (err) console.log(err);
+                    for (let i = 0; i < empRes.length; i++) {
+                        if (empRes[i].first_name) {
+                            managers.push(empRes[i].first_name + " " + empRes[i].last_name);
+                        }
+                    }
+
+                    inquirer.prompt([
+                        {
+                            type: 'input',
+                            name: 'first',
+                            message: `Enter the new employee's first name`
+                        },
+                        {
+                            type: 'input',
+                            name: 'last',
+                            message: `Enter the new employee's last name`
+                        },
+                        {
+                            type: 'list',
+                            name: 'role',
+                            choices: roles,
+                            message: `Select the employee's new role`
+                        },
+                        {
+                            type: 'list',
+                            name: 'manager',
+                            choices: managers,
+                            message: 'Which employee will be their manager?'
+                        }
+                    ])
+                        .then(data => {
+                            let roleId = null;
+                            for (let i = 0; i < roleRes.length; i++) {
+                                if (roleRes[i].title === data.role) {
+                                    roleId = roleRes[i].id;
+                                    break;
+                                }
+                            }
+
+                            let managerId = null;
+                            for (let i = 0; i < empRes.length; i++) {
+                                if (empRes[i].first_name + " " + empRes[i].last_name === data.manager) {
+                                    managerId = empRes[i].id;
+                                    break;
+                                }
+                            }
+                            employee.addEmployee(data.first, data.last, roleId, managerId)
+                            start();
+                        });
+                }
+            );
         }
-    ])
-        .then(data => {
-            employee.addEmployee(data.employeeName);
-            start();
-        })
+    );
 }
 
 //updateEmployeeRole function
