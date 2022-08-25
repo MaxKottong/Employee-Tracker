@@ -81,10 +81,10 @@ function addDepartment() {
         name: 'deptName',
         message: 'What is the name of the new department?'
     })
-        .then(data => {
-            department.addDepartment(data.deptName);
-            start();
-        })
+    .then(data => {
+        department.addDepartment(data.deptName);
+        start();
+    })
 }
 
 //addRole function
@@ -128,17 +128,17 @@ function addRole() {
                     }
                 }
             ])
-                .then((data) => {
-                    let departmentId = null;
-                    for (let i = 0; i < res.length; i++) {
-                        if (res[i].name == data.departmentName) {
-                            departmentId = res[i].id;
-                            break;
-                        }
+            .then((data) => {
+                let departmentId = null;
+                for (let i = 0; i < res.length; i++) {
+                    if (res[i].name == data.departmentName) {
+                        departmentId = res[i].id;
+                        break;
                     }
-                    role.addRole(data.title, data.salary, departmentId);
-                    start();
-                });
+                }
+                role.addRole(data.title, data.salary, departmentId);
+                start();
+            });
         }
     );
 }
@@ -360,8 +360,6 @@ function remove() {
                     removeRole();
                     break;
             }
-
-            start();
         })
 }
 
@@ -397,6 +395,7 @@ function removeEmployee() {
                     }
 
                     employee.removeEmployee(employeeId);
+                    start();
                 });
         }
     )
@@ -411,8 +410,8 @@ function removeDepartment() {
                 console.log(err);
             }
             for (let i = 0; i < res.length; i++) {
-                if (res[i].id) {
-                    departments.push(res[i].id);
+                if (res[i].name) {
+                    departments.push(res[i].name);
                 }
             }
 
@@ -420,27 +419,24 @@ function removeDepartment() {
                 {
                     type: 'list',
                     message: 'Which department would you like to remove?',
+                    choices: departments,
                     name: 'deptName'
                 }
             ])
                 .then(data => {
                     let deptId = null;
                     for (let i = 0; i < res.length; i++) {
-                        if (res[i].id == data.deptName) {
+                        if (res[i].name == data.deptName) {
                             deptId = res[i].id;
                             break;
                         }
                     }
 
                     department.removeDepartment(deptId);
+                    start();
                 });
         }
     )
-    //Get list of departments
-    //Let user pick a department
-
-    //Look up the departmentId based on the name chosen
-    //Call deleteDepartment
 
 }
 
@@ -453,28 +449,30 @@ function removeRole() {
                 console.log(err);
             }
             for (let i = 0; i < res.length; i++) {
-                if (res[i].id) {
-                    roles.push(res[i].id);
+                if (res[i].title) {
+                    roles.push(res[i].title);
                 }
             }
 
-            inquirer.promot([
+            inquirer.prompt([
                 {
                     type: 'list',
                     message: 'Which role would you like to remove?',
+                    choices: roles,
                     name: 'roleName'
                 }
             ])
                 .then(data => {
                     let roleId = null;
                     for (let i = 0; i < res.length; i++) {
-                        if (res[i].id == data.roleName) {
+                        if (res[i].title == data.roleName) {
                             roleId = res[i].id;
                             break;
                         }
                     }
 
                     role.removeRole(roleId);
+                    start();
                 })
         }
     )
